@@ -368,6 +368,7 @@ static void bq24192_therm_mitigation_work(struct work_struct *work)
 		chip->therm_mitigation = false;
 	}
 
+	pr_debug("thermal mitigation start. max_input_i_ma = %d current input_i_limit=%d\n", chip->max_input_i_ma, input_limit_ma);
 	ret = bq24192_set_input_i_limit(chip, input_limit_ma);
 	if (ret)
 		pr_err("failed to set input current limit as %d\n",
@@ -773,6 +774,7 @@ static void bq24192_vbat_work(struct work_struct *work)
 	int step_current_ma;
 	int step_input_i_ma;
 
+/* This is to LOWER battery current near end of charging, based on Vbatt */
 	if (chip->vbat_noti_stat == ADC_TM_HIGH_STATE) {
 		step_current_ma = chip->dwn_chg_i_ma;
 		step_input_i_ma = chip->dwn_input_i_ma;
@@ -846,6 +848,7 @@ static int bq24192_step_down_detect_init(struct bq24192_chip *chip)
 	chip->adc_param.channel = VBAT_SNS;
 
 	ret = qpnp_adc_tm_channel_measure(&chip->adc_param);
+	pr_debug("vbat step down detection enabled\n");
 	if (ret)
 		pr_err("request ADC error %d\n", ret);
 
@@ -1039,6 +1042,7 @@ static void bq24192_external_power_changed(struct power_supply *psy)
 		chip->usb_psy->get_property(chip->usb_psy,
 				  POWER_SUPPLY_PROP_CURRENT_MAX, &ret);
 		bq24192_set_input_vin_limit(chip, chip->vin_limit_mv);
+		/* place to override USB input current limit, should it be required */
 		bq24192_set_input_i_limit(chip, ret.intval / 1000);
 		bq24192_set_ibat_max(chip, USB_MAX_IBAT_MA);
 		pr_debug("usb is online! i_limit = %d v_limit = %d\n",
@@ -1205,6 +1209,7 @@ static void bq24192_input_limit_worker(struct work_struct *work)
 
 	if (vbus_mv > chip->icl_vbus_mv
 			&& chip->icl_idx < (ARRAY_SIZE(adap_tbl) - 1)) {
+		pr_debug("High power AC adapter detected vbus=%d, icl_vbus=%d\n", vbus_mv, chip->icl_vbus_mv);
 		chip->icl_idx++;
 		bq24192_set_input_i_limit(chip,
 				adap_tbl[chip->icl_idx].input_limit);
@@ -1213,6 +1218,7 @@ static void bq24192_input_limit_worker(struct work_struct *work)
 		schedule_delayed_work(&chip->input_limit_work,
 					msecs_to_jiffies(500));
 	} else {
+		pr_debug("Low power AC adapter detected vbus=%d, icl_vbus=%d\n", vbus_mv, chip->icl_vbus_mv);
 		if (chip->icl_idx > 0 && vbus_mv <= chip->icl_vbus_mv)
 			chip->icl_idx--;
 
