@@ -165,7 +165,7 @@ struct current_limit_entry {
 
 static struct current_limit_entry adap_tbl[] = {
 	{1500, 1280},
-	{2000, 1696},
+	{2000, 1536},
 };
 
 static int bq24192_step_down_detect_disable(struct bq24192_chip *chip);
