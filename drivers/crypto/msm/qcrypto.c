@@ -2547,23 +2547,6 @@ static int _qcrypto_aead_rfc4309_ccm_setauthsize(struct crypto_aead *authenc,
 	return 0;
 }
 
-static int _qcrypto_aead_rfc4309_ccm_setauthsize(struct crypto_aead *authenc,
-				  unsigned int authsize)
-{
-	struct qcrypto_cipher_ctx *ctx = crypto_aead_ctx(authenc);
-
-	switch (authsize) {
-	case 8:
-	case 12:
-	case 16:
-		break;
-	default:
-		return -EINVAL;
-	}
-	ctx->authsize = authsize;
-	return 0;
-}
-
 
 static int _qcrypto_aead_setkey(struct crypto_aead *tfm, const u8 *key,
 			unsigned int keylen)

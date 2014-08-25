@@ -1,4 +1,5 @@
-/* Copyright (c) 2012, 2014,  The Linux Foundation. All rights reserved.
+/*
+ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -10,9 +11,13 @@
  * GNU General Public License for more details.
  */
 
-#ifndef SENSORS_ADSP_H
-#define SENSORS_ADSP_H
+#ifndef __I2C_QUP_H__
+#define __I2C_QUP_H__
 
-#include <linux/types.h>
+#ifdef CONFIG_I2C_QUP
+int __init qup_i2c_init_driver(void);
+#else
+static inline int __init qup_i2c_init_driver(void) { return 0; }
+#endif
 
-#endif /* SENSORS_ADSP_H */
+#endif /* __I2C_QUP_H__ */
